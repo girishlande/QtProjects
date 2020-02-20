@@ -5,6 +5,8 @@ PRECONDITION
 It makes use of cmake. You should have that installed. 
 Using cmake you can build vtk and qt so their dlls are compatible with common generator(compiler). 
 It assumes that you already have vtk and qt installed in your system. 
+To build vtk, download stable release source code. create install folder in source folder. 
+Use cmake to configure and build this project. Make sure you check QT option and provide correct QT path. 
 You can download and build qt using your compiler(generator).
 
 Now try to build this project.
