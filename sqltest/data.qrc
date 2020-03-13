@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>splashscreen.png</file>
+        <file>db/imagedata.db</file>
     </qresource>
 </RCC>

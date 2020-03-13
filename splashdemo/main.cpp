@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    QPixmap pixmap(":/splash_vision.bmp");
+    QPixmap pixmap(":/splashscreen.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
     splash->showMessage("Loaded modules");
