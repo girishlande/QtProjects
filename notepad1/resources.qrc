@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/new/images">
+        <file>images/girishlande.jfif</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>images/splashscreen.png</file>
+    </qresource>
+</RCC>
