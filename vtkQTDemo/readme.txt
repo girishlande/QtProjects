@@ -8,6 +8,7 @@ It assumes that you already have vtk and qt installed in your system.
 To build vtk, download stable release source code. create install folder in source folder. 
 Use cmake to configure and build this project. Make sure you check QT option and provide correct QT path. 
 You can download and build qt using your compiler(generator).
+NOTE: Please see vtkQTCmakeSettings.png in this folder for settings related to QT in cmake s
 
 Now try to build this project.
 
