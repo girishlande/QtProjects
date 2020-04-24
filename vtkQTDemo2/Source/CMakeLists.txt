@@ -43,14 +43,17 @@ find_package (Qt5
   REQUIRED
 )
 
+include_directories(${VTK_INCLUDE_DIRS} )
+
 add_executable(vtkQTDemo
     mainwindow.ui
     mainwindow.cpp
     main.cpp
+    GPLView.cpp
+    MouseEventHandler.cpp
     resource.qrc
 )
 
-include_directories(${VTK_INCLUDE_DIRS})
 
 target_link_libraries(vtkQTDemo
   PUBLIC

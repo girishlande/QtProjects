@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "dicominteractionstyle.h"
 #include "modelinteractionstyle.h"
+#include "GPLView.h"
 
-#include "QVTKWidget.h"
 #include <QBoxLayout.h>
 #include <QComboBox.h>
 #include <QDir.h>
@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <qdebug.h>
 #include <qscrollbar.h>
+#include <QVTKOpenGLNativeWidget.h>
 
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderWindow.h>
@@ -30,6 +31,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
+
 
 // headers needed for this example
 #include <QStackedWidget.h>
@@ -71,10 +73,10 @@ MainWindow::MainWindow(QWidget* parent)
     // ----------------------------------
     // Create VTK Widgets for each View
     // ----------------------------------
-    view1 = new QVTKWidget(this);
-    view2 = new QVTKWidget(this);
-    view3 = new QVTKWidget(this);
-    view4 = new QVTKWidget(this);
+    view1 = new GPLView(this);
+    view2 = new GPLView(this);
+    view3 = new GPLView(this);
+    view4 = new GPLView(this);
 
     // ---------------------------------
     // Create layout for main window
@@ -118,11 +120,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     m_container_layout = new QGridLayout;
     m_container_layout->addWidget(view1, 0, 0, 1, 1);
-    m_container_layout->addWidget(s1, 0, 1, 1, 1);
-    m_container_layout->addWidget(view2, 0, 2, 1, 1);
+    m_container_layout->addWidget(view2, 0, 1, 1, 1);
     m_container_layout->addWidget(view3, 1, 0, 1, 1);
-    m_container_layout->addWidget(s2, 1, 1, 1, 1);
-    m_container_layout->addWidget(view4, 1, 2, 1, 1);
+    m_container_layout->addWidget(view4, 1, 1, 1, 1);
     QWidget* container = new QWidget;
     container->setLayout(m_container_layout);
 

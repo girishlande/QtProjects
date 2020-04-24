@@ -9,6 +9,9 @@ class QVBoxLayout;
 class vtkImageViewer2;
 class QScrollBar;
 class QGridLayout;
+class QVTKOpenGLNativeWidget;
+class GPLView;
+
 namespace Ui {
 class MainWindow;
 }
@@ -23,10 +26,10 @@ public:
 
     QVBoxLayout *vboxLayout;
     QWidget *centralwidget;
-    QVTKWidget *view1;
-    QVTKWidget *view2;
-    QVTKWidget *view3;
-    QVTKWidget *view4;
+    GPLView* view1;
+    GPLView* view2;
+    GPLView* view3;
+    GPLView* view4;
     QGridLayout *m_container_layout;
 
     QString dicom_dir_path;
@@ -67,6 +70,8 @@ private:
     QScrollBar* s1;
     vtkImageViewer2* s1_viewer;
     vtkImageViewer2* s2_viewer;
+
+    QVTKOpenGLNativeWidget* vtk_widget_;
 };
 
 #endif // MAINWINDOW_H

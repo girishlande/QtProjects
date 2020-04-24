@@ -56,7 +56,7 @@ void MainWindow::HideMessageBox()
 void MainWindow::startProcess()
 {
     ShowMessageBox();
-    QString processPath = "D:\\test\\build-TimerProcess-Desktop_Qt_5_13_0_MinGW_64_bit-Debug\\debug\\TimerProcess.exe";
+    QString processPath = "D:\\git\\QtProjects\\TestProc\\build-TimerProcess-Desktop_Qt_5_13_0_MinGW_64_bit-Debug\\debug";
     QProcess *process = new QProcess(this);
     connect(process,SIGNAL(started()),this,SLOT(OnStarted()));
     connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
