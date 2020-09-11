@@ -41,7 +41,7 @@
 #include <sstream>
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), s1_viewer(nullptr) {
+    : QMainWindow(parent), ui(new Ui::MainWindow), m_vtkImageViewer(nullptr) {
 
   // Setup window and resize it
   ui->setupUi(this);
@@ -66,34 +66,23 @@ MainWindow::MainWindow(QWidget* parent)
   // ----------------------------------
   // Create VTK Widgets for each View
   // ----------------------------------
-  view1 = new QVTKWidget(this);
+  m_vtkView = new QVTKWidget(this);
 
   QVBoxLayout* tablayout = new QVBoxLayout();
-  QPushButton* b1 = new QPushButton("Pelvic Plane", this);
-  connect(b1, SIGNAL(clicked(bool)), this, SLOT(pelvic_plane()));
+  QPushButton* b1 = new QPushButton("Test Button", this);
+  connect(b1, SIGNAL(clicked(bool)), this, SLOT(test()));
   tablayout->addWidget(b1);
 
-  s1 = new QScrollBar(this);
-  s1->setFixedWidth(20);
-  connect(s1, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged1(int)));
-
-  QWidget* firstPageWidget = new QWidget;
-  QWidget* secondPageWidget = new QWidget;
-  QWidget* thirdPageWidget = new QWidget;
-
-  // Add different pages for each button
-  QStackedWidget* stackedWidget = new QStackedWidget;
-  stackedWidget->addWidget(firstPageWidget);
-  stackedWidget->addWidget(secondPageWidget);
-  stackedWidget->addWidget(thirdPageWidget);
-  tablayout->addWidget(stackedWidget);
+  m_slider = new QScrollBar(this);
+  m_slider->setFixedWidth(20);
+  connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged1(int)));
 
   QWidget* controls_widget = new QWidget;
   controls_widget->setLayout(tablayout);
 
   m_container_layout = new QGridLayout;
-  m_container_layout->addWidget(view1, 0, 0, 1, 1);
-  m_container_layout->addWidget(s1, 0, 1, 1, 1);
+  m_container_layout->addWidget(m_vtkView, 0, 0, 1, 1);
+  m_container_layout->addWidget(m_slider, 0, 1, 1, 1);
   QWidget* container = new QWidget;
   container->setLayout(m_container_layout);
 
@@ -113,10 +102,10 @@ MainWindow::MainWindow(QWidget* parent)
 
   this->setCentralWidget(centralwidget);
 
-  DoView_1();
+  InitialiseView();
 }
 
-void MainWindow::DoView_1() {
+void MainWindow::InitialiseView() {
   vtkSmartPointer<vtkSphereSource> s1 = vtkSmartPointer<vtkSphereSource>::New();
   s1->Update();
 
@@ -127,7 +116,7 @@ void MainWindow::DoView_1() {
   sa1->SetMapper(sm1);
   vtkSmartPointer<vtkRenderer> r1 = vtkSmartPointer<vtkRenderer>::New();
   r1->AddActor(sa1);
-  this->view1->GetRenderWindow()->AddRenderer(r1);
+  this->m_vtkView->GetRenderWindow()->AddRenderer(r1);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -176,10 +165,10 @@ void MainWindow::UpdateViewForDICOM() {
       vtkSmartPointer<vtkImageViewer2>::New();
   imageViewer->SetInputConnection(reader->GetOutputPort());
   imageViewer->SetSliceOrientationToXY();
-  s1_viewer = imageViewer.Get();
-  s1->setMinimum(imageViewer->GetSliceMin());
-  s1->setMaximum(imageViewer->GetSliceMax());
-  s1->setValue(imageViewer->GetSlice());
+  m_vtkImageViewer = imageViewer.Get();
+  m_slider->setMinimum(imageViewer->GetSliceMin());
+  m_slider->setMaximum(imageViewer->GetSliceMax());
+  m_slider->setValue(imageViewer->GetSlice());
 
   // slice status message
   vtkSmartPointer<vtkTextProperty> sliceTextProp =
@@ -245,8 +234,8 @@ void MainWindow::UpdateViewForDICOM() {
   imageViewer->GetRenderer()->AddActor2D(sliceTextActor);
   // imageViewer->GetRenderer()->AddActor2D(usageTextActor);
 
-  imageViewer->SetRenderWindow(view1->GetRenderWindow());
-  view1->GetRenderWindow()->SetInteractor(renderWindowInteractor);
+  imageViewer->SetRenderWindow(m_vtkView->GetRenderWindow());
+  m_vtkView->GetRenderWindow()->SetInteractor(renderWindowInteractor);
 
   // initialize rendering and interaction
   imageViewer->Render();
@@ -255,15 +244,15 @@ void MainWindow::UpdateViewForDICOM() {
   renderWindowInteractor->Start();
 }
 
-void MainWindow::pelvic_plane() { cout << "pelvic_plane() called" << endl; }
+void MainWindow::test() { cout << "pelvic_plane() called" << endl; }
 
-void MainWindow::orient_angle() { m_container_layout->removeWidget(view1); }
+void MainWindow::orient_angle() { m_container_layout->removeWidget(m_vtkView); }
 
 void MainWindow::sliderChanged1(int value) {
-  if (s1_viewer) {
-    s1_viewer->SetSlice(value);
+  if (m_vtkImageViewer) {
+    m_vtkImageViewer->SetSlice(value);
     myVtkInteractorStyleImage* style =
-        (myVtkInteractorStyleImage*)view1->GetRenderWindow()
+        (myVtkInteractorStyleImage*)m_vtkView->GetRenderWindow()
             ->GetInteractor()
             ->GetInteractorStyle();
     if (style) {
@@ -273,4 +262,4 @@ void MainWindow::sliderChanged1(int value) {
 }
 
 
-void MainWindow::updateSlider(int value) { s1->setValue(value); }
+void MainWindow::updateSlider(int value) { m_slider->setValue(value); }

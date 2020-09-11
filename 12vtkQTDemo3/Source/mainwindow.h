@@ -23,13 +23,13 @@ public:
 
     QVBoxLayout *vboxLayout;
     QWidget *centralwidget;
-    QVTKWidget *view1;
+    QVTKWidget *m_vtkView;
     QGridLayout *m_container_layout;
 
     QString dicom_dir_path;
     int current_view_index;
 
-    void DoView_1();
+    void InitialiseView();
 
     void UpdateViewForDICOM();
     void updateSlider(int value);
@@ -40,16 +40,15 @@ private slots:
 
     void updateview_1();
 
-    void pelvic_plane();
+    void test();
     void orient_angle();
 
     void sliderChanged1(int value);
 
 private:
     Ui::MainWindow *ui;
-    QScrollBar* s2;
-    QScrollBar* s1;
-    vtkImageViewer2* s1_viewer;
+    QScrollBar* m_slider;
+    vtkImageViewer2* m_vtkImageViewer;
 };
 
 #endif // MAINWINDOW_H
