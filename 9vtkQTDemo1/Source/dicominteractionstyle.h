@@ -55,6 +55,10 @@ public:
         _StatusMapper = statusMapper;
     }
 
+    void updateSliceMsg(int sliceNumber) {
+      std::string msg = StatusMessage::Format(sliceNumber, _MaxSlice);
+      _StatusMapper->SetInput(msg.c_str());
+    }
 
 protected:
     void MoveSliceForward() {

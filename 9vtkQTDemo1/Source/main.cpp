@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     vtkObject::GlobalWarningDisplayOff();
 
     MainWindow w;
-    w.show();
+    w.showMaximized();
 
     return a.exec();
 }
