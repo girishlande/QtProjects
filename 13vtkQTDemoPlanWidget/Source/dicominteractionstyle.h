@@ -73,7 +73,7 @@ class myVtkInteractorStyleImage : public vtkInteractorStyleImage {
       _StatusMapper->SetInput(msg.c_str());
       _ImageViewer->Render();
       if (m_window) {
-        m_window->updateSlider(_Slice);
+        //m_window->updateSlider(_Slice);
       }
     }
   }
@@ -86,7 +86,7 @@ class myVtkInteractorStyleImage : public vtkInteractorStyleImage {
       _StatusMapper->SetInput(msg.c_str());
       _ImageViewer->Render();
       if (m_window) {
-        m_window->updateSlider(_Slice);
+        //m_window->updateSlider(_Slice);
       }
     }
   }

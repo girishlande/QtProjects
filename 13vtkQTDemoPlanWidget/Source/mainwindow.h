@@ -7,6 +7,7 @@
 #include "vtkImageData.h"
 #include "vtkSmartPointer.h"
 #include "vtkImagePlaneWidget.h"
+#include "vtkDICOMImageReader.h"
 
 class QVTKWidget;
 class QVBoxLayout;
@@ -31,40 +32,24 @@ class MainWindow : public QMainWindow {
 
   void InitialiseView();
 
-  void updateSlider(int value);
+ protected slots:
+  void on_actionOpen_DICOM_file_triggered();
+  void on_actionExit_triggered();
+  void test1();
+  void test2();
+  void displayPlaneWidgets();
+  void Update3DPlaneWidgets();
 
  protected:
   void initialiseWithDICOM();
-  void addDicomImageInViewport();
-  void prepareImageData(vtkSmartPointer<vtkImageData>& input, int direction,
-                        vtkSmartPointer<vtkImageData>& output);
-  void fetchXYImage(vtkSmartPointer<vtkImageData>& input,
-                    vtkSmartPointer<vtkImageData>& output);
-  void fetchYZImage(vtkSmartPointer<vtkImageData>& input,
-                    vtkSmartPointer<vtkImageData>& output);
-  void fetchXZImage(vtkSmartPointer<vtkImageData>& input,
-                    vtkSmartPointer<vtkImageData>& output);
-
-  void AddLineActor(vtkRenderer* renderer);
-  void AddSphereActor(vtkRenderer* renderer);
-
- private slots:
-
-  void on_actionOpen_DICOM_file_triggered();
-  void on_actionExit_triggered();
-  void sliderChanged(int value);
-  void UpdateViewForDICOM();
-  void test1();
-  void test2();
-  void MultipleViewports();
-  void createMultipleViewports();
-  void ViewportBorder(vtkSmartPointer<vtkRenderer>& renderer,
-                                  double* color, bool last);
-  void printImageDetails(vtkSmartPointer<vtkImageData>& image);
-  void createPlaneWidget();
   void calculateKeyPoints();
+  void Create3DImagePlaneWidgets();
+  void Show3DPlaneWidgets(bool flag);
+  void ReadInputDICOM();
+  
 
  private:
+
   Ui::MainWindow* ui;
   QScrollBar* m_slider;
   vtkImageViewer2* m_vtkImageViewer;
@@ -75,15 +60,20 @@ class MainWindow : public QMainWindow {
 
   QString m_dicom_dir_path = "";
 
-   vtkSmartPointer<vtkImagePlaneWidget> m_plane;
+  vtkSmartPointer<vtkRenderer> m_renderer;
+  vtkSmartPointer<vtkDICOMImageReader> m_dicom_reader;
+  vtkImageData* m_dicom_image;
+  vtkSmartPointer<vtkImagePlaneWidget> m_plane;
+  vtkSmartPointer<vtkImagePlaneWidget> m_3DPlaneWidget[3];
+  bool m_planeVisible = false;
 
   // Define center point of planer
-  double m_plane_center[3];
+  double m_plane_center[3] = {200, 200, 200};
 
   // Define Normal vectors of planes
-  double m_normal_Z[3];
-  double m_normal_X[3];
-  double m_normal_Y[3];
+  double m_normal_Z[3] = {0, 0, 1};
+  double m_normal_X[3] = {1, 0, 0};
+  double m_normal_Y[3] = {0, 1, 0};
 
   // Points away
   double m_XX_1[3];
