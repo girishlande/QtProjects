@@ -38,6 +38,9 @@
 #include "vtkImageMapper.h"
 #include "vtkLineSource.h"
 #include "vtkNamedColors.h"
+#include "vtkPolyLine.h"
+#include "vtkPolyDataMapper2D.h"
+#include "vtkProperty2D.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_vtkImageViewer(nullptr) {
@@ -61,14 +64,9 @@ MainWindow::MainWindow(QWidget* parent)
   vboxLayout->setObjectName(QStringLiteral("vboxLayout"));
 
   m_vtkView = new QVTKWidget(this);
-  m_slider = new QScrollBar(this);
-  m_slider->setFixedWidth(20);
-  // connect(m_slider, SIGNAL(valueChanged(int)), this,
-  // SLOT(sliderChanged(int)));
 
   m_container_layout = new QGridLayout;
   m_container_layout->addWidget(m_vtkView, 0, 0, 1, 1);
-  m_container_layout->addWidget(m_slider, 0, 1, 1, 1);
   QWidget* container = new QWidget;
   container->setLayout(m_container_layout);
 
@@ -151,7 +149,7 @@ void MainWindow::on_actionOpen_DICOM_file_triggered() {
 // -----------------------
 // Test functions
 // -----------------------
-void MainWindow::test1() {}
+void MainWindow::test1() { createMultipleViewports(); }
 void MainWindow::test2() {
   m_planeVisible = !m_planeVisible;
   Show3DPlaneWidgets(m_planeVisible);
@@ -172,9 +170,6 @@ void MainWindow::displayPlaneWidgets() {
 
   // Create Dicom image plane widgets in view no 4
   Create3DImagePlaneWidgets();
-
-  //calculateKeyPoints();
-  //Update3DPlaneWidgets();
 }
 
 // ------------------------------------------
@@ -229,63 +224,6 @@ void MainWindow::Create3DImagePlaneWidgets() {
   m_renderer->ResetCamera();
 }
 
-// --------------------------------------
-// Calculate key points for 3D planes
-// --------------------------------------
-void MainWindow::calculateKeyPoints() {
-  double XX[3] = {m_normal_X[0], m_normal_X[1], m_normal_X[2]};
-  double YY[3] = {m_normal_Y[0], m_normal_Y[1], m_normal_Y[2]};
-  double ZZ[3] = {m_normal_Z[0], m_normal_Z[1], m_normal_Z[2]};
-
-  vtkMath::Normalize(XX);
-  vtkMath::MultiplyScalar(XX, 256);
-  vtkMath::Normalize(YY);
-  vtkMath::MultiplyScalar(YY, 256);
-  vtkMath::Normalize(ZZ);
-  vtkMath::MultiplyScalar(ZZ, 256);
-
-  vtkMath::Add(m_plane_center, XX, m_XX_1);
-  vtkMath::Add(m_plane_center, YY, m_YY_1);
-  vtkMath::Add(m_plane_center, ZZ, m_ZZ_1);
-
-  vtkMath::Subtract(m_plane_center, XX, m_XX_2);
-  vtkMath::Subtract(m_plane_center, YY, m_YY_2);
-  vtkMath::Subtract(m_plane_center, ZZ, m_ZZ_2);
-
-  vtkMath::Subtract(m_XX_2, YY, m_XY_origin);
-  vtkMath::Subtract(m_YY_2, ZZ, m_YZ_origin);
-  vtkMath::Subtract(m_ZZ_2, XX, m_XZ_origin);
-}
-
-// ---------------------------------------------------------
-// Update 3D plane widgets with different origin points
-// ---------------------------------------------------------
-void MainWindow::Update3DPlaneWidgets() {
-  for (int i = 0; i < 3; i++) {
-    vtkPlaneSource* ps = static_cast<vtkPlaneSource*>(
-        m_3DPlaneWidget[i]->GetPolyDataAlgorithm());
-    switch (i) {
-      case 0:  // ps->SetNormal(m_normal_X);
-        ps->SetOrigin(m_YZ_origin);
-        ps->SetPoint1(m_XX_1);
-        ps->SetPoint2(m_XX_2);
-        break;
-      case 1:  // ps->SetNormal(m_normal_Z);
-        ps->SetOrigin(m_XY_origin);
-        ps->SetPoint1(m_ZZ_1);
-        ps->SetPoint2(m_ZZ_2);
-        break;
-      case 2:  // ps->SetNormal(m_normal_Y);
-        ps->SetOrigin(m_XZ_origin);
-        ps->SetPoint1(m_YY_1);
-        ps->SetPoint2(m_YY_2);
-        break;
-    }
-    ps->SetCenter(m_plane_center);
-    this->m_3DPlaneWidget[i]->UpdatePlacement();
-  }
-}
-
 // ------------------------------------------
 // Show / Hide 3D planes in model window
 // ------------------------------------------
@@ -297,4 +235,96 @@ void MainWindow::Show3DPlaneWidgets(bool flag) {
       m_3DPlaneWidget[i]->Off();
     }
   }
+}
+
+void MainWindow::createMultipleViewports() {
+  int numberOfFiles = 4;
+  vtkNew(vtkNamedColors, colors);
+  vtkSmartPointer<vtkRenderWindow> renderWindow = m_vtkView->GetRenderWindow();
+
+  double size = 1.0 / numberOfFiles;
+  for (unsigned int i = 0; static_cast<int>(i) < numberOfFiles; ++i) {
+    vtkNew(vtkSphereSource, sphere);
+    sphere->SetCenter(0, 0, 0);
+    sphere->SetRadius(2);
+    sphere->Update();
+
+    vtkNew(vtkPolyDataMapper, mapper);
+    mapper->SetInputConnection(sphere->GetOutputPort());
+
+    vtkNew(vtkActor, actor);
+    actor->SetMapper(mapper);
+    actor->GetProperty()->SetColor(colors->GetColor3d("Silver").GetData());
+
+    vtkNew(vtkRenderer, renderer);
+    renderer->AddActor(actor);
+    renderer->SetBackground(colors->GetColor3d("SlateGray").GetData());
+
+    double viewport[4];
+    viewport[0] = size * i;
+    viewport[1] = 0.0;
+    viewport[2] = size * (i + 1);
+    viewport[3] = 1.0;
+    renderer->SetViewport(viewport);
+    ViewportBorder(renderer, colors->GetColor3d("Gold").GetData(),
+                   static_cast<int>(i) == numberOfFiles - 1);
+    renderWindow->AddRenderer(renderer);
+  }
+
+  renderWindow->Render();
+}
+
+void MainWindow::ViewportBorder(vtkSmartPointer<vtkRenderer>& renderer,
+                                double* color, bool last) {
+  // points start at upper right and proceed anti-clockwise
+  vtkNew(vtkPoints, points);
+  points->SetNumberOfPoints(4);
+  points->InsertPoint(0, 1, 1, 0);
+  points->InsertPoint(1, 0, 1, 0);
+  points->InsertPoint(2, 0, 0, 0);
+  points->InsertPoint(3, 1, 0, 0);
+
+  // create cells, and lines
+  vtkNew(vtkCellArray, cells);
+  cells->Initialize();
+  vtkNew(vtkPolyLine, lines);
+
+  // only draw last line if this is the last viewport
+  // this prevents double vertical lines at right border
+  // if different colors are used for each border, then do
+  // not specify last
+  if (last) {
+    lines->GetPointIds()->SetNumberOfIds(5);
+  } else {
+    lines->GetPointIds()->SetNumberOfIds(4);
+  }
+  for (unsigned int i = 0; i < 4; ++i) {
+    lines->GetPointIds()->SetId(i, i);
+  }
+  if (last) {
+    lines->GetPointIds()->SetId(4, 0);
+  }
+  cells->InsertNextCell(lines);
+
+  // now make tge polydata and display it
+  vtkNew(vtkPolyData, poly);
+  poly->Initialize();
+  poly->SetPoints(points);
+  poly->SetLines(cells);
+
+  // use normalized viewport coordinates since
+  // they are independent of window size
+  vtkNew(vtkCoordinate, coordinate);
+  coordinate->SetCoordinateSystemToNormalizedViewport();
+
+  vtkNew(vtkPolyDataMapper2D, mapper);
+  mapper->SetInputData(poly);
+  mapper->SetTransformCoordinate(coordinate);
+
+  vtkNew(vtkActor2D, actor);
+  actor->SetMapper(mapper);
+  actor->GetProperty()->SetColor(color);
+  actor->GetProperty()->SetLineWidth(4.0);  // Line Width
+
+  renderer->AddViewProp(actor);
 }

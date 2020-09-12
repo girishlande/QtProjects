@@ -38,20 +38,19 @@ class MainWindow : public QMainWindow {
   void test1();
   void test2();
   void displayPlaneWidgets();
-  void Update3DPlaneWidgets();
 
  protected:
   void initialiseWithDICOM();
-  void calculateKeyPoints();
   void Create3DImagePlaneWidgets();
   void Show3DPlaneWidgets(bool flag);
   void ReadInputDICOM();
-  
+  void createMultipleViewports();
+  void ViewportBorder(vtkSmartPointer<vtkRenderer>& renderer, double* color,
+                      bool last);
 
  private:
 
   Ui::MainWindow* ui;
-  QScrollBar* m_slider;
   vtkImageViewer2* m_vtkImageViewer;
   QVBoxLayout* vboxLayout;
   QWidget* centralwidget;
@@ -66,25 +65,6 @@ class MainWindow : public QMainWindow {
   vtkSmartPointer<vtkImagePlaneWidget> m_plane;
   vtkSmartPointer<vtkImagePlaneWidget> m_3DPlaneWidget[3];
   bool m_planeVisible = false;
-
-  // Define center point of planer
-  double m_plane_center[3] = {200, 200, 200};
-
-  // Define Normal vectors of planes
-  double m_normal_Z[3] = {0, 0, 1};
-  double m_normal_X[3] = {1, 0, 0};
-  double m_normal_Y[3] = {0, 1, 0};
-
-  // Points away
-  double m_XX_1[3];
-  double m_YY_1[3];
-  double m_ZZ_1[3];
-  double m_XX_2[3];
-  double m_YY_2[3];
-  double m_ZZ_2[3];
-  double m_XY_origin[3];
-  double m_YZ_origin[3];
-  double m_XZ_origin[3];
 };
 
 #endif  // MAINWINDOW_H
