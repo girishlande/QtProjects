@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>db/imagedata.db</file>
+    </qresource>
+</RCC>
